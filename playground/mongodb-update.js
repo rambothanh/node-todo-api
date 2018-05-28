@@ -31,20 +31,33 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp',(err, client) => {
 	//Cập nhật của module mondodb V3 phải thêm dòng này
 	const db = client.db('TodoApp');
 	
-	// //deleteMany
-	// db.collection('Todos').deleteMany({text: 'eat lunch'}).then((result) => {
+	// //Tìm kiếm google: mongodb update operators
+	// db.collection('Todos').findOneAndUpdate({
+	// 	_id: new ObjectID('5b0ad12ee0cb573ae0e02700')
+	// }, {$set: {
+	// 	completed: true
+	// }}, {
+	// 	//returnOriginal: false in giá trị sau khi update
+	// 	//returnOriginal: true in giá trị trước khi update
+	// 	returnOriginal: false
+	// }).then( (result) => {
 	// 	console.log(result);
-	// }, (err) => {
-	// 	console.log (err);
 	// });
-	//
-	// //deleteOne : xóa 1 item đầu tiên phù hợp
-	// db.collection('Todos').deleteOne({text: 'eat lunch'}).then((result) => {
-	// 	console.log(result);
-	// });
-	// //
-	//find one and delete : findOneAndDelete
-	db.collection('Todos').findOneAndDelete({completed: false}).then((result) => {
+	// 
+	db.collection('Users').findOneAndUpdate({
+		_id: new ObjectID('5b0aa9fba18b8d0a2041de92')
+	}, {
+		//$set gán giá trị mới
+		$set: {
+			name: "Nguyen Trong Thanh"
+		},
+		//$inc tăng giá trị của trường
+		$inc: {
+			age: 1
+		}
+	},{
+		returnOriginal: false
+	}).then( (result) => {
 		console.log(result);
 	});
 	
