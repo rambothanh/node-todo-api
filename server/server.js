@@ -44,7 +44,7 @@ module.exports = {app};
 
 
 // //Tạo đối tượng mới theo model Todo
-// var newTodo = new Todo({
+// var newTodo = new Todo({ 
 //     text: 'Cook dinn  er'
 // });
 
