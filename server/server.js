@@ -12,7 +12,7 @@ var {User} = require('./models/User');
 var {ObjectID} = require('mongodb');
 
 var app = express();
-const port = process.env.PORT ||3000
+const port = process.env.PORT || 3000;
 
 //Biến chuỗi thành json khi request đến
 app.use(bodyParser.json());
