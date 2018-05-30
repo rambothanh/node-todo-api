@@ -6,7 +6,7 @@ var {mongoose} = require('./db/mongoose');
 
 var {Todo} = require('./models/todo');
 
-var {User} = require('./models/User');
+var {User} = require('./models/user');
 
 //Nhỡ kỹ chữ O và ID viết hoa, rất dễ nhầm lẫn
 var {ObjectID} = require('mongodb');
