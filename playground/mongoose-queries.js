@@ -33,13 +33,13 @@ const { User } = require('./../server/models/user');
 
 //findByID cũng chỉ xuất 1 đối tượng
 //recommend
-// Todo.findById(id).then((todo) => {
-//     if (!todo) {
-//         console.log('Id not found');
-//     } else {
-//         console.log("Todo by ID", todo);
-//     }
-// }).catch((e) => console.log(e));
+Todo.findById(id).then((todo) => {
+    if (!todo) {
+        console.log('Id not found');
+    } else {
+        console.log("Todo by ID", todo);
+    }
+}).catch((e) => console.log(e));
 // 
 //Tự làm với collection user - Phương pháp tối ưu nhất
 User.findById('5b0c1cf31cfc9b2b008c8bd611').then((todo) => {
@@ -49,4 +49,4 @@ User.findById('5b0c1cf31cfc9b2b008c8bd611').then((todo) => {
 		return console.log('Id not found');
 	} 
 	console.log('Todo',todo);
-}, (e) => console.log(e));
+})..catch((e) => console.log(e));

@@ -8,6 +8,9 @@ var {Todo} = require('./models/todo');
 
 var {User} = require('./models/User');
 
+//Nhỡ kỹ chữ O và ID viết hoa, rất dễ nhầm lẫn
+var {ObjectID} = require('mongodb');
+
 var app = express();
 
 //Biến chuỗi thành json khi request đến
@@ -33,6 +36,34 @@ app.get('/todos', (req,res) => {
 	}, (e) => {
 		res.status(400).send(e);
 	});
+
+});
+
+
+//GET /todos/132154
+//req.params.id: chính là '132154' trong request bên trên
+app.get('/todos/:id',(req, res) => {
+	//lấy id mà người dùng request cho vào biến id
+	var id = req.params.id;
+	//res.send(id);
+
+	//Kiểm tra bến id, nếu Id không hợp lệ
+	//thì trả về lỗi 404 và send null
+	
+	if (!ObjectID.isValid(id)) {
+		return res.status(404).send();
+	} 
+		//Nếu Id hợp lệ thì findById
+		Todo.findById(id).then((todo) => {
+			//Nếu findById tìm không thấy thì trả về 400
+			if (!todo) {
+				return res.status(404).send();
+			};
+			//Nếu findById tìm thấy thì trả về todo
+			res.send({todo});
+
+		}).catch((e) => res.status(400).send());
+	
 
 });
 
