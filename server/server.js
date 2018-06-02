@@ -120,6 +120,34 @@ app.patch('/todos/:id',(req, res) => {
 
 });
 
+//Làm cái này lúc test bằng postman, request POST 1 cái json
+//quên dấu "," vậy mà test đi test lại mất cả ngày mới thấy 
+app.post('/users', (req, res) => {
+    //_.pick: Chỉ lấy thuộc tính của object được chỉ định
+	var body = _.pick(req.body, ['email','password']);
+
+	//Tạo đối tượng user theo model User theo thông
+	//tin được cung cấp bởi req (body bên trên)
+	var user = new User(body);
+
+	//Save user bên trên vào database (collection users)
+	//Bỏ tên user trong hàm then bên dưới, chưa biết lý do
+	user.save().then(() => {
+		return user.generateAuthToken();
+		//res.send({user});
+	}).then((token) => {
+		res.header('x-auth',token).send(user);
+	} ).catch((e) => {
+		res.status(404).send(e);
+	})
+
+
+
+});
+
+
+
+
 app.listen(port , () => {
 	console.log (`Started at port ${port}`);
 
