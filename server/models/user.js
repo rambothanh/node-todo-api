@@ -55,7 +55,7 @@ UserSchema.methods.toJSON = function () {
 	//_.pick: Chỉ lấy thuộc tính của object được chỉ định
 	return _.pick(userObject,['_id','email']);
 
-}
+};
 
 UserSchema.methods.generateAuthToken = function () {
 	var user = this;
@@ -71,7 +71,42 @@ UserSchema.methods.generateAuthToken = function () {
 		return token;
 	});
 
+};
+
+UserSchema.statics.findByToken = function (token) {
+	//Các phương thức cá thể được gọi với tài liệu riêng lẻ
+	//ví dụ như bên trên var user = this;
+	//Các phương thức model được gọi với model như bên dưới
+	var User = this;
+	var decoded;
+
+	try {
+		//Xác nhận mã token (giải mã)
+		decoded = jwt.verify(token, 'abc123');
+	} catch (e) {
+		//Nếu xác nhận token không đúng thì:
+		// return new Promise((resolve, reject) => {
+		// 	reject();
+
+		// });
+		// Viết gọn lại 3 dòng trên thành:
+		return Promise.reject();
+		//Đối số của reject này chính là thông báo lỗi (e)
+		//của catch((e)) ở bên file server.js (phía trên chỗ comment
+		// Lỗi 401 Unauthorized)
+	}
+	//Nếu token là đúng:
+	return User.findOne({
+		'_id': decoded._id,
+		//Để truy vấn những giá trị lồng nhau trong Object
+		//phải bọc lại bằng dấu ngoặc kép hoặc đơn
+		//để cho mọi thứ nhất quán, _id bên trên cũng được 
+		//để trong ngoặc luôn
+		'tokens.token': token,
+		'tokens.access': 'auth'
+	});
 }
+
 
 var User = mongoose.model('User',UserSchema);
 

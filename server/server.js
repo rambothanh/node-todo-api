@@ -16,6 +16,8 @@ var {User} = require('./models/user');
 //Nhỡ kỹ chữ O và ID viết hoa, rất dễ nhầm lẫn
 var {ObjectID} = require('mongodb');
 
+var {authenticate} = require('./middleware/authenticate');
+
 var app = express();
 const port = process.env.PORT || 3000;
 
@@ -45,7 +47,7 @@ app.get('/todos', (req,res) => {
 
 });
 
-
+ 
 //GET /todos/132154
 //req.params.id: chính là '132154' trong request bên trên
 app.get('/todos/:id',(req, res) => {
@@ -145,8 +147,13 @@ app.post('/users', (req, res) => {
 
 });
 
+//Tạo midleware function để tạo router riêng tư
 
 
+//Route riêng tư, phải có mã token mới truy cập được
+app.get('/users/me',authenticate, (req, res) => {
+	res.send(req.user);
+});
 
 app.listen(port , () => {
 	console.log (`Started at port ${port}`);
