@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 
 // validate : Tìm mongoose validate để tìm hiểu thêm
@@ -106,6 +107,35 @@ UserSchema.statics.findByToken = function (token) {
 		'tokens.access': 'auth'
 	});
 }
+
+
+//Sử dụng middleware của mongoose (cụ thể là pre), để thực 
+//hiện một số thay đổi, trước khi save tài liệu và database
+UserSchema.pre('save', function (next) {
+	var user = this;
+
+	//isModified Trả về true nếu tài liệu này đã được sửa đổi
+	//Nếu password được sửa đổi, thì hash password, 
+	//ngược lại thì trả về hàm next()
+	if (user.isModified('password')) {
+		//Tự Thêm salt và hash password
+		bcrypt.genSalt(10, (err, salt) => {
+			bcrypt.hash(user.password, salt, (err, hash) => {
+				//Ghi đè mật khẩu bằng giá trị hash
+				user.password = hash;
+				next();
+			});
+		});
+
+
+	} else {
+		//Buộc phải gọi next() để thực hiện tác vụ 
+		//liên quan tiếp theo, nếu không chương trình
+		//sẽ bị treo mãi (hoặc lỗi)
+		next();
+	};
+	
+});
 
 
 var User = mongoose.model('User',UserSchema);
