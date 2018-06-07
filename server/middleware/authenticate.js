@@ -1,6 +1,6 @@
 var {User} = require('./../models/user');
 
-
+//Tạo midleware function để tạo router riêng tư
 var authenticate = (req, res, next) => {
 	var token = req.header('x-auth');	
 

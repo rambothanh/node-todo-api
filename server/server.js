@@ -147,13 +147,30 @@ app.post('/users', (req, res) => {
 
 });
 
-//Tạo midleware function để tạo router riêng tư
-
 
 //Route riêng tư, phải có mã token mới truy cập được
 app.get('/users/me',authenticate, (req, res) => {
 	res.send(req.user);
 });
+
+
+app.post('/users/login', (req, res) => {
+	var body = _.pick(req.body, ['email','password']);
+	//Xác nhận user có tồn tại hay không bằng hàm middleware 
+	//tự tạo findByCredentials
+	
+	User.findByCredentials(body.email, body.password).then((user) => {
+		// Nếu User tồn tại và password đúng
+		return user.generateAuthToken().then((token) => {
+			res.header('x-auth',token).send(user);
+		});
+
+	}).catch((e) => {
+		res.status(400).send();
+	});
+});
+
+
 
 app.listen(port , () => {
 	console.log (`Started at port ${port}`);

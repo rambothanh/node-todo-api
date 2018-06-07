@@ -106,7 +106,34 @@ UserSchema.statics.findByToken = function (token) {
 		'tokens.token': token,
 		'tokens.access': 'auth'
 	});
-}
+};
+
+
+UserSchema.statics.findByCredentials = function (email, password) {
+	var user = this;
+	return User.findOne({email}).then((user) => {
+		//Nếu email không tồn tại
+		if(!user) {
+			//Sẽ tự động chuyển sang catch bên server.js
+			return Promise.reject(); 
+		};
+		//Nếu có tồn tại email, tiến hành so sánh passwordhashed
+		//và vì Bcrypt không hỗ trợ promise chỉ hỗ trợ callback
+		//nên phải đưa nó vào trong promise
+		
+		return new Promise((resolve, reject) => {
+			bcrypt.compare(password, user.password, (err, res) => {
+				if(res){
+					resolve(user);
+				}else {
+					reject();
+				};
+				
+			});
+		});
+		
+	});
+};
 
 
 //Sử dụng middleware của mongoose (cụ thể là pre), để thực 

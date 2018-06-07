@@ -19,7 +19,7 @@ var password = '123abc';
 var hashedPassword = '$2a$10$a4T033FkyAX2dkrJRxMRr.fgjXQd8iuHwvIsl9WKmHQCS5e2HtSDm';
 
 //So sánh giá trị băm với password
-bcrypt.compare('123abC', hashedPassword, (err, res) => {
+bcrypt.compare('123abc', hashedPassword, (err, res) => {
 	console.log(res);
 });
 
