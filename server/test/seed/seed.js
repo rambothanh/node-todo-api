@@ -18,7 +18,10 @@ var users = [{
 	_id: userTwoId,
 	email: 'thanhag@gmail.com',
 	password: 'userTwoPass',
-	
+	tokens: [{
+		access: 'auth',
+		token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123').toString()	
+	}]
 }];
 
 
@@ -27,12 +30,14 @@ var users = [{
 const todos = [{
 	_id: new ObjectID(),
 	text: 'First test todo',
+	_creator: userOneId
 		
 },{
 	_id: new ObjectID(),
 	text: 'Second test todo',
 	completed: true,
-	completedAt: 888
+	completedAt: 888,
+	_creator: userTwoId
 }];
 
 //Mỗi khi done được gọi thì sẽ remove data khỏi Todo và insert data

@@ -25,9 +25,12 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
 	var todo = new Todo ({
-		text: req.body.text
+		text: req.body.text,
+		//Lấy _id của user đang thực hiện req post này
+		//để đưa vào _creator
+		_creator: req.user._id
 	});
 
  	//Save vào database
@@ -38,8 +41,11 @@ app.post('/todos', (req, res) => {
  	});
 });
 
-app.get('/todos', (req,res) => {
-	Todo.find().then((todos) => {
+app.get('/todos',authenticate, (req,res) => {
+	//Tìm những todos có _creator là _id của user đang req
+	Todo.find({
+		_creator: req.user._id
+	}).then((todos) => {
 		res.send(todos);
 	}, (e) => {
 		res.status(400).send(e);
@@ -50,7 +56,7 @@ app.get('/todos', (req,res) => {
  
 //GET /todos/132154
 //req.params.id: chính là '132154' trong request bên trên
-app.get('/todos/:id',(req, res) => {
+app.get('/todos/:id',authenticate,(req, res) => {
 	//lấy id mà người dùng request cho vào biến id
 	var id = req.params.id;
 	//res.send(id);
@@ -61,8 +67,13 @@ app.get('/todos/:id',(req, res) => {
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
 	} 
-		//Nếu Id hợp lệ thì findById
-		Todo.findById(id).then((todo) => {
+		//Nếu Id hợp lệ thì findOne (để có thể xác nhận người dùng
+		// nếu không cần xác nhận người dùng thì có thể dùng
+		// findById)
+		Todo.findOne({
+			_id: id,
+			_creator: req.user._id
+		}).then((todo) => {
 			//Nếu findById tìm không thấy thì trả về 400
 			if (!todo) {
 				return res.status(404).send();
@@ -76,14 +87,18 @@ app.get('/todos/:id',(req, res) => {
 });
 
 //Xóa , làm tương tụ như: //GET /todos/132154
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id',authenticate, (req, res) => {
 	var id = req.params.id;
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
 	};
-	 //Đã từng làm sai thành findByIdAndDelete
-	Todo.findByIdAndRemove(id).then((todo) => {
+	 //Nếu không có thêm phần xác thực người dùng thì có thể
+	 //dùng findByIdAndRemove, nhưng nên dùng: findOneAndRemove
+	Todo.findOneAndRemove({
+		_id: id,
+		_creator: req.user._id
+	}).then((todo) => {
 		if (!todo) {
 			return res.status(404).send();
 
@@ -94,7 +109,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 //Tạo router update
-app.patch('/todos/:id',(req, res) => {
+app.patch('/todos/:id',authenticate,(req, res) => {
 	var id = req.params.id;
 	//_.pick: Chỉ lấy thuộc tính của object được chỉ định
 	var body = _.pick(req.body, ['text','completed']);
@@ -112,7 +127,10 @@ app.patch('/todos/:id',(req, res) => {
 		body.completedAt = null
 	};
 	//returnOriginal: false hoặc new: true là tương đương nhau
-	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+	Todo.findOneAndUpdate({
+		_id: id,
+		_creator: req.user._id
+	}, {$set: body}, {new: true}).then((todo) => {
 		if (!todo) { return res.status(404).send()};
 
 
