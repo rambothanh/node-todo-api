@@ -74,6 +74,18 @@ UserSchema.methods.generateAuthToken = function () {
 
 };
 
+UserSchema.methods.removeToken = function (token) {
+	var user = this;
+
+	//$pull sẽ xóa 1 mảng  nếu giá trị chỉ định trùng khớp
+	return user.update({
+		$pull: {
+			tokens: {token}
+		}
+	});
+};
+
+
 UserSchema.statics.findByToken = function (token) {
 	//Các phương thức cá thể được gọi với tài liệu riêng lẻ
 	//ví dụ như bên trên var user = this;
