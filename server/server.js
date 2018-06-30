@@ -24,7 +24,6 @@ const port = process.env.PORT || 3000;
 //Biến chuỗi thành json khi request đến
 app.use(bodyParser.json());
 
-
 app.post('/todos', authenticate, (req, res) => {
 	var todo = new Todo ({
 		text: req.body.text,
@@ -87,25 +86,30 @@ app.get('/todos/:id',authenticate,(req, res) => {
 });
 
 //Xóa , làm tương tụ như: //GET /todos/132154
-app.delete('/todos/:id',authenticate, (req, res) => {
-	var id = req.params.id;
+app.delete('/todos/:id',authenticate, async (req, res) => {
+	const id = req.params.id;
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
 	};
-	 //Nếu không có thêm phần xác thực người dùng thì có thể
-	 //dùng findByIdAndRemove, nhưng nên dùng: findOneAndRemove
-	Todo.findOneAndRemove({
-		_id: id,
-		_creator: req.user._id
-	}).then((todo) => {
+
+	try {
+		
+		 //Nếu không có thêm phần xác thực người dùng thì có thể
+		 //dùng findByIdAndRemove, nhưng nên dùng: findOneAndRemove
+		const todo = await Todo.findOneAndRemove({
+			_id: id,
+			_creator: req.user._id
+		});
+
 		if (!todo) {
-			return res.status(404).send();
-
+				return res.status(404).send();
 		};
-		res.send({todo});
-	}).catch((e) => res.status(400).send());
 
+		res.send({todo});
+	} catch (e) {
+		res.status(400).send()
+	}
 });
 
 //Tạo router update
@@ -142,27 +146,22 @@ app.patch('/todos/:id',authenticate,(req, res) => {
 
 //Làm cái này lúc test bằng postman, request POST 1 cái json
 //quên dấu "," vậy mà test đi test lại mất cả ngày mới thấy 
-app.post('/users', (req, res) => {
-    //_.pick: Chỉ lấy thuộc tính của object được chỉ định
-	var body = _.pick(req.body, ['email','password']);
+app.post('/users', async (req, res) => {
+    try {
+		 //_.pick: Chỉ lấy thuộc tính của object được chỉ định
+		const body = _.pick(req.body, ['email','password']);
 
-	//Tạo đối tượng user theo model User theo thông
-	//tin được cung cấp bởi req (body bên trên)
-	var user = new User(body);
+		//Tạo đối tượng user theo model User theo thông
+		//tin được cung cấp bởi req (body bên trên)
+		const user = new User(body);
 
-	//Save user bên trên vào database (collection users)
-	//Bỏ tên user trong hàm then bên dưới, chưa biết lý do
-	user.save().then(() => {
-		return user.generateAuthToken();
-		//res.send({user});
-	}).then((token) => {
+		//Save user bên trên vào database (collection users)
+		await user.save();
+		const token = await user.generateAuthToken();
 		res.header('x-auth',token).send(user);
-	} ).catch((e) => {
-		res.status(404).send(e);
-	})
-
-
-
+    } catch (e) {
+    	res.status(404).send(e);
+    }
 });
 
 
@@ -172,30 +171,30 @@ app.get('/users/me',authenticate, (req, res) => {
 });
 
 
-app.post('/users/login', (req, res) => {
-	var body = _.pick(req.body, ['email','password']);
-	//Xác nhận user có tồn tại hay không bằng hàm middleware 
-	//tự tạo findByCredentials
+app.post('/users/login', async (req, res) => {
 	
-	User.findByCredentials(body.email, body.password).then((user) => {
-		// Nếu User tồn tại và password đúng
-		return user.generateAuthToken().then((token) => {
-			res.header('x-auth',token).send(user);
-		});
-
-	}).catch((e) => {
+	try {
+		const body = _.pick(req.body, ['email','password']);
+		//Xác nhận user có tồn tại hay không bằng hàm middleware 
+		//tự tạo findByCredentials
+		const user = await User.findByCredentials(body.email, body.password);
+		const token = await user.generateAuthToken();
+		res.header('x-auth',token).send(user);
+	} catch (e) {
 		res.status(400).send();
-	});
+	};
+	
+	
 });
 
-
-app.delete('/users/me/token', authenticate, (req, res) => {
-
-	req.user.removeToken(req.token).then(() => {
+//Sử dụng async - await 
+app.delete('/users/me/token', authenticate, async (req, res) => {
+	try {
+		await req.user.removeToken(req.token);
 		res.status(200).send();
-	}, () => {
+	} catch (e) {
 		res.status(400).send();
-	})
+	};
 });
 
 

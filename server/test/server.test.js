@@ -393,15 +393,15 @@ describe('POST /users/login', () => {
 				User.findById(users[1]._id).then((user) => {
 					//Tìm hiểu thêm về toContainEqual ở : expect jest
 					// Hàm toInclude khồng sài được, chưa biết thay thế 
-					// bằng gì
-					// expect(user.tokens[0]).toContainEqual({
-					// 	access: 'auth',
-					// 	token: res.headers['x-auth']
-					// });
+					//
+					expect(user.toObject().tokens[1]).toMatchObject({
+						access: 'auth',
+						token: res.headers['x-auth']
+					});
 					//phải là tokens thứ 2 tokens[1] vì user[1] đã được
 					//định nghĩa 1 token rồi
-					expect(user.tokens[1].access).toBe('auth');
-					expect(user.tokens[1].token).toBe(res.headers['x-auth']);
+					// expect(user.tokens[1].access).toBe('auth');
+					// expect(user.tokens[1].token).toBe(res.headers['x-auth']);
 					done();
 				}).catch((e) => done(e));
 			});
